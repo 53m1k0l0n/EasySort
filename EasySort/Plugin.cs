@@ -2,13 +2,11 @@
 using Dalamud.Game.Gui;
 using Dalamud.IoC;
 using Dalamud.Plugin;
+using ECommons;
 using FFXIVClientStructs.FFXIV.Component.GUI;
-using System.IO;
-using System.Reflection;
-using XivCommon;
-using System.Collections.Generic;
 using ImGuiNET;
-
+using System.IO;
+using XivCommon;
 
 namespace EasySort
 {
@@ -47,7 +45,8 @@ namespace EasySort
          //   IconFont = Util.SetupFont(pluginInterface);
             this.Configuration = this.PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
             this.Configuration.Initialize(this.PluginInterface);
-            common = new(); // just need the chat feature to send commands
+            ECommonsMain.Init(pluginInterface, this);
+            //common = new(); // just need the chat feature to send commands
             // you might normally want to embed resources and load them from the manifest stream
             var imagePath = Path.Combine(PluginInterface.AssemblyLocation.Directory?.FullName!, "sort.png");
             var sortImage = this.PluginInterface.UiBuilder.LoadImage(imagePath);
@@ -70,7 +69,7 @@ namespace EasySort
         {
             this.PluginUi.Dispose();
             this.CommandManager.RemoveHandler(commandName);
-            common.Dispose();
+            //common.Dispose();
 
         }
 
@@ -83,24 +82,23 @@ namespace EasySort
 
         public void runSort(string inven = "inventory", string direction="asc")
         {
-
-            common.Functions.Chat.SendMessage("/isort clear inventory");
+            ECommons.Automation.Chat.Instance.SendMessage("/isort clear inventory");
             if (Configuration.Conditions is not null && Configuration.Conditions.Count > 0)
             {
                 foreach (var condition in Configuration.Conditions)
                 {
                     if (condition.Condition == "tab") direction = "";
 
-                    common.Functions.Chat.SendMessage($"/isort condition {condition.InventoryType} {condition.Condition} {condition.Direction}");
+                    ECommons.Automation.Chat.Instance.SendMessage($"/isort condition {condition.InventoryType} {condition.Condition} {condition.Direction}");
                     if (Configuration.ShowChat)
-                        common.Functions.Chat.SendMessage($"/echo [EasySort] ran condition: {condition.InventoryType} {condition.Condition} {condition.Direction}");
+                        ECommons.Automation.Chat.Instance.SendMessage($"/echo [EasySort] ran condition: {condition.InventoryType} {condition.Condition} {condition.Direction}");
 
                 }
 
             }
-            common.Functions.Chat.SendMessage("/isort execute inventory");
+            ECommons.Automation.Chat.Instance.SendMessage("/isort execute inventory");
             if (Configuration.ShowChat)
-            common.Functions.Chat.SendMessage("/echo [EasySort] sorted inventory!");
+                ECommons.Automation.Chat.Instance.SendMessage("/echo [EasySort] sorted inventory!");
 
 
         }
